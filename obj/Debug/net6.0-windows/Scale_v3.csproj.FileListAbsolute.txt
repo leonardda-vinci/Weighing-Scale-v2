@@ -1,0 +1,17 @@
+C:\Users\RCS\source\repos\Scale_v3\bin\Debug\net6.0-windows\Scale_v3.exe
+C:\Users\RCS\source\repos\Scale_v3\bin\Debug\net6.0-windows\Scale_v3.deps.json
+C:\Users\RCS\source\repos\Scale_v3\bin\Debug\net6.0-windows\Scale_v3.runtimeconfig.json
+C:\Users\RCS\source\repos\Scale_v3\bin\Debug\net6.0-windows\Scale_v3.dll
+C:\Users\RCS\source\repos\Scale_v3\bin\Debug\net6.0-windows\Scale_v3.pdb
+C:\Users\RCS\source\repos\Scale_v3\obj\Debug\net6.0-windows\Scale_v3.Form1.resources
+C:\Users\RCS\source\repos\Scale_v3\obj\Debug\net6.0-windows\Scale_v3.Properties.Resources.resources
+C:\Users\RCS\source\repos\Scale_v3\obj\Debug\net6.0-windows\Scale_v3.csproj.GenerateResource.cache
+C:\Users\RCS\source\repos\Scale_v3\obj\Debug\net6.0-windows\Scale_v3.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\RCS\source\repos\Scale_v3\obj\Debug\net6.0-windows\Scale_v3.AssemblyInfoInputs.cache
+C:\Users\RCS\source\repos\Scale_v3\obj\Debug\net6.0-windows\Scale_v3.AssemblyInfo.cs
+C:\Users\RCS\source\repos\Scale_v3\obj\Debug\net6.0-windows\Scale_v3.csproj.CoreCompileInputs.cache
+C:\Users\RCS\source\repos\Scale_v3\obj\Debug\net6.0-windows\Scale_v3.dll
+C:\Users\RCS\source\repos\Scale_v3\obj\Debug\net6.0-windows\refint\Scale_v3.dll
+C:\Users\RCS\source\repos\Scale_v3\obj\Debug\net6.0-windows\Scale_v3.pdb
+C:\Users\RCS\source\repos\Scale_v3\obj\Debug\net6.0-windows\Scale_v3.genruntimeconfig.cache
+C:\Users\RCS\source\repos\Scale_v3\obj\Debug\net6.0-windows\ref\Scale_v3.dll

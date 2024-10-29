@@ -1,0 +1,99 @@
+{
+  "Version": 1,
+  "WorkspaceRootPath": "C:\\Users\\RCS\\source\\repos\\Scale_v3\\",
+  "Documents": [
+    {
+      "AbsoluteMoniker": "D:0:0:{B14E27B9-E729-4F22-9BFE-E9E7C21A9E6D}|Scale_v3.csproj|C:\\Users\\RCS\\source\\repos\\Scale_v3\\form1.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form",
+      "RelativeMoniker": "D:0:0:{B14E27B9-E729-4F22-9BFE-E9E7C21A9E6D}|Scale_v3.csproj|solutionrelative:form1.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{B14E27B9-E729-4F22-9BFE-E9E7C21A9E6D}|Scale_v3.csproj|c:\\users\\rcs\\source\\repos\\scale_v3\\form1.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{B14E27B9-E729-4F22-9BFE-E9E7C21A9E6D}|Scale_v3.csproj|solutionrelative:form1.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\RCS\\AppData\\Local\\SourceServer\\8f700240ec87c83bc75611a287f0e8cefeca3d21d869de9463ad13390de902d3\\src\\libraries\\System.Private.CoreLib\\src\\System\\ThrowHelper.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\RCS\\AppData\\Local\\SourceServer\\8b2817de3c3a2e2ff120492580ae6ca91392c54c4d57047f92b838b72b2f1881\\src\\coreclr\\System.Private.CoreLib\\src\\System\\Delegate.CoreCLR.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{B14E27B9-E729-4F22-9BFE-E9E7C21A9E6D}|Scale_v3.csproj|c:\\users\\rcs\\source\\repos\\scale_v3\\iniparser.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{B14E27B9-E729-4F22-9BFE-E9E7C21A9E6D}|Scale_v3.csproj|solutionrelative:iniparser.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    }
+  ],
+  "DocumentGroupContainers": [
+    {
+      "Orientation": 0,
+      "VerticalTabListWidth": 256,
+      "DocumentGroups": [
+        {
+          "DockedWidth": 416,
+          "SelectedChildIndex": 4,
+          "Children": [
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
+              "Title": "Delegate.CoreCLR.cs",
+              "DocumentMoniker": "C:\\Users\\RCS\\AppData\\Local\\SourceServer\\8b2817de3c3a2e2ff120492580ae6ca91392c54c4d57047f92b838b72b2f1881\\src\\coreclr\\System.Private.CoreLib\\src\\System\\Delegate.CoreCLR.cs",
+              "RelativeDocumentMoniker": "..\\..\\..\\AppData\\Local\\SourceServer\\8b2817de3c3a2e2ff120492580ae6ca91392c54c4d57047f92b838b72b2f1881\\src\\coreclr\\System.Private.CoreLib\\src\\System\\Delegate.CoreCLR.cs",
+              "ToolTip": "C:\\Users\\RCS\\AppData\\Local\\SourceServer\\8b2817de3c3a2e2ff120492580ae6ca91392c54c4d57047f92b838b72b2f1881\\src\\coreclr\\System.Private.CoreLib\\src\\System\\Delegate.CoreCLR.cs",
+              "RelativeToolTip": "..\\..\\..\\AppData\\Local\\SourceServer\\8b2817de3c3a2e2ff120492580ae6ca91392c54c4d57047f92b838b72b2f1881\\src\\coreclr\\System.Private.CoreLib\\src\\System\\Delegate.CoreCLR.cs",
+              "ViewState": "AgIAAEoAAAAAAAAAAAAQwFsAAAAMAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-10-28T07:47:49.638Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "ThrowHelper.cs",
+              "DocumentMoniker": "C:\\Users\\RCS\\AppData\\Local\\SourceServer\\8f700240ec87c83bc75611a287f0e8cefeca3d21d869de9463ad13390de902d3\\src\\libraries\\System.Private.CoreLib\\src\\System\\ThrowHelper.cs",
+              "RelativeDocumentMoniker": "..\\..\\..\\AppData\\Local\\SourceServer\\8f700240ec87c83bc75611a287f0e8cefeca3d21d869de9463ad13390de902d3\\src\\libraries\\System.Private.CoreLib\\src\\System\\ThrowHelper.cs",
+              "ToolTip": "C:\\Users\\RCS\\AppData\\Local\\SourceServer\\8f700240ec87c83bc75611a287f0e8cefeca3d21d869de9463ad13390de902d3\\src\\libraries\\System.Private.CoreLib\\src\\System\\ThrowHelper.cs",
+              "RelativeToolTip": "..\\..\\..\\AppData\\Local\\SourceServer\\8f700240ec87c83bc75611a287f0e8cefeca3d21d869de9463ad13390de902d3\\src\\libraries\\System.Private.CoreLib\\src\\System\\ThrowHelper.cs",
+              "ViewState": "AgIAAOEAAAAAAAAAAAAQwPIAAABHAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-10-28T07:47:03.965Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "Form1.cs",
+              "DocumentMoniker": "C:\\Users\\RCS\\source\\repos\\Scale_v3\\Form1.cs",
+              "RelativeDocumentMoniker": "Form1.cs",
+              "ToolTip": "C:\\Users\\RCS\\source\\repos\\Scale_v3\\Form1.cs",
+              "RelativeToolTip": "Form1.cs",
+              "ViewState": "AgIAADAAAAAAAAAAAAAcwD4AAAAhAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-10-28T00:41:45.104Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 4,
+              "Title": "IniParser.cs",
+              "DocumentMoniker": "C:\\Users\\RCS\\source\\repos\\Scale_v3\\IniParser.cs",
+              "RelativeDocumentMoniker": "IniParser.cs",
+              "ToolTip": "C:\\Users\\RCS\\source\\repos\\Scale_v3\\IniParser.cs",
+              "RelativeToolTip": "IniParser.cs",
+              "ViewState": "AgIAAI4AAAAAAAAAAAAmwHIAAAAEAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-10-28T03:02:17.712Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "Form1.cs [Design]",
+              "DocumentMoniker": "C:\\Users\\RCS\\source\\repos\\Scale_v3\\Form1.cs",
+              "RelativeDocumentMoniker": "Form1.cs",
+              "ToolTip": "C:\\Users\\RCS\\source\\repos\\Scale_v3\\Form1.cs [Design]",
+              "RelativeToolTip": "Form1.cs [Design]",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-10-28T00:37:41.939Z",
+              "EditorCaption": " [Design]"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
