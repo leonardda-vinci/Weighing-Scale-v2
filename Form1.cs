@@ -2,7 +2,11 @@
 using Microsoft.VisualBasic.Logging;
 using System;
 using System.Diagnostics;
+using System.Drawing.Printing;
+using System.IO;
 using System.Net.NetworkInformation;
+using System.Runtime.CompilerServices;
+using System.Windows.Forms;
 using System.Xml.Linq;
 
 namespace Scale_v3
@@ -37,15 +41,9 @@ namespace Scale_v3
 			InitializeComponent();
 
 
-			if (!Directory.Exists(this.downloadDir))
-			{
-				Directory.CreateDirectory(this.downloadDir);
-			}
+			if (!Directory.Exists(this.downloadDir)) Directory.CreateDirectory(this.downloadDir);
 
-			if (!Directory.Exists(this.extractDir))
-			{
-				Directory.CreateDirectory(this.extractDir);
-			}
+			if (!Directory.Exists(this.extractDir)) Directory.CreateDirectory(this.extractDir);
 
 			if (InitClass.CheckApp() == true)
 			{
@@ -54,28 +52,94 @@ namespace Scale_v3
 				Application.Exit();
 			}
 
+			//for (int i = 1; i <= 3; i++)
+			//{
+			//	this.devices[i - 1] = this.iniFile.GetSetting("Address", "SD" + i.ToString());
+			//}
+			logTextBox.AppendText($"Weighing Scale is running...\r\n");
+			InitializeWatcher();
+			bingoFound();
+		}
+
+		private void InitializeWatcher()
+		{
 			try
 			{
-				fileWatcher = new FileSystemWatcher(this.sourceDir);
-				fileWatcher.Filter = "*bingo";
-				fileWatcher.NotifyFilter = NotifyFilters.LastWrite;
+				fileWatcher = new FileSystemWatcher(this.sourceDir, "*bingo");
+				fileWatcher.NotifyFilter = NotifyFilters.LastWrite | NotifyFilters.FileName;
 				fileWatcher.Changed += OnChanged;
+				fileWatcher.Error += OnError;
 				fileWatcher.EnableRaisingEvents = true;
+				fileWatcher.InternalBufferSize = 64 * 1024;
+				fileWatcher.IncludeSubdirectories = false;
 			}
 			catch (Exception err)
 			{
 				MessageBox.Show(err.Message);
 			}
-
-			logTextBox.AppendText("Scale is running...\r\n");
-			bingoFound();
 		}
-		private void OnChanged(object sender, FileSystemEventArgs e)
+
+		private void OnError(object sender, ErrorEventArgs e)
 		{
-			if (e.ChangeType != WatcherChangeTypes.Changed)
+			PrintException(e.GetException());
+			logs($"Exception: {e.GetException().Message}");
+
+			if (e.GetException() is InternalBufferOverflowException)
 			{
+				logs($"InteralBufferExceptionException: {e.GetException().Message}");
+				InitializeWatcher();
 				return;
 			}
+
+			while (true)
+			{
+				if (Directory.Exists(this.sourceDir))
+				{
+					logs($"The File Watcher has been restored and keeping an eye on your files in {this.sourceDir}!");
+					if (File.Exists("bingo"))
+						bingoFound();
+					else
+						InitializeWatcher();
+					break;
+				}
+				else 
+				{
+					logs($"{this.sourceDir} is not accessible right now. Retrying in 5 seconds...");
+					Thread.Sleep(5000);
+				}
+			}
+		}
+
+		private void PrintException(Exception? err)
+		{
+			if (err == null) return;
+			string timestamp = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
+			string message = $"[{timestamp}] Message: {err.Message}";
+
+			if (err.InnerException != null)
+			{
+				message += $"\r\n[{timestamp}] InnerException: {err.InnerException}";
+			}
+
+			if (err.StackTrace != null)
+			{
+				message += $"\r\n[{timestamp}] StackTrace: {err.StackTrace}";
+			}
+
+			logs(message);
+
+			//logTextBox.Invoke((Action)(() =>
+			//{
+			//	logTextBox.AppendText($"{message}\r\n");
+			//}));
+
+			//MessageBox.Show(message, "Print Exception Error", MessageBoxButtons.OK);
+			PrintException(err.InnerException);
+		}
+
+		private void OnChanged(object sender, FileSystemEventArgs e)
+		{
+			if (e.ChangeType != WatcherChangeTypes.Changed) return;
 
 			Debug.WriteLine($"Changed: {e.FullPath} - {e.ChangeType}");
 			if (e.FullPath.Contains("bingo"))
@@ -103,52 +167,17 @@ namespace Scale_v3
 			{
 				string ip = this.iniFile.GetSetting("Address", "SD" + i.ToString());
 				this.deviceStatus[i - 1] = timestamp + "|" + ip;
-				if (i == 1)
+				if (CheckPing(ip))
 				{
-					if (CheckPing(ip))
-					{
-						logs($"Device {ip} is available!");
-						this.devices[i - 1] = ip;
-						this.deviceStatus[i - 1] += "|OK";
-					}
-					else
-					{
-						logs($"Device {ip} is not available!");
-						this.deviceStatus[i - 1] += "|NOK";
-						continue;
-					}
+					logs($"Device {ip} is available!");
+					this.devices[i - 1] = ip;
+					this.deviceStatus[i - 1] += "|OK";
 				}
-
-				if (i == 2)
+				else
 				{
-					if (CheckPing(ip))
-					{
-						logs($"Device {ip} is available!");
-						this.devices[i - 1] = ip;
-						this.deviceStatus[i - 1] += "|OK";
-					}
-					else
-					{
-						logs($"Device {ip} is not available!");
-						this.deviceStatus[i - 1] += "|NOK";
-						continue;
-					}
-				}
-
-				if (i == 3)
-				{
-					if (CheckPing(ip))
-					{
-						logs($"Device {ip} is available!");
-						this.devices[i - 1] = ip;
-						this.deviceStatus[i - 1] += "|OK";
-					}
-					else
-					{
-						logs($"Device {ip} is not available!");
-						this.deviceStatus[i - 1] += "|NOK";
-						continue;
-					}
+					logs($"Device {ip} is not available!");
+					this.deviceStatus[i - 1] += "|NOK";
+					continue;
 				}
 			}
 			UpDoDel();
@@ -208,10 +237,12 @@ namespace Scale_v3
 					string name = Path.GetFileName(file);
 					for (int i = 0; i < this.devices.Length; i++)
 					{
-						if (ip[i] == null)
+						if (this.devices[i] == null)
 						{
-							continue;
+							this.deviceStatus[i] += "|NOK";
+							continue; // Skip to the next iteration
 						}
+
 						logs($"Uploading {name} to {ip[i]}...");
 						aclasCmd("Upload", name, ip[i]);
 						logs($"{name} was successfully uploaded to {ip[i]}...");
@@ -242,16 +273,23 @@ namespace Scale_v3
 
 		private void Download(string ip)
 		{
+			if (ip == null)
+			{
+				for (int i = 0; i < this.devices.Length; i++)
+				{
+					if (this.devices[i] == null)
+					{
+						this.deviceStatus[i] += "|NOK";
+					}
+				}
+				return;
+			}
+
 			DateTime date = DateTime.Today;
 			string current = String.Format("{0:yyyyMMdd}", date);
 			string filename = ip + "_PLU-UP_" + current + ".txt";
 			string from = Path.Combine(this.inDir, filename);
 			string to = Path.Combine(this.extractDir, filename);
-
-			if (ip == null)
-			{
-				return;
-			}
 			logs($"Downloading {ip} data...");
 			aclasCmd("Download", filename, ip);
 			try
@@ -273,8 +311,16 @@ namespace Scale_v3
 		{
 			if (ip == null)
 			{
+				for (int i = 0; i < this.devices.Length; i++)
+				{
+					if (this.devices[i] == null)
+					{
+						this.deviceStatus[i] += "|NOK";
+					}
+				}
 				return;
 			}
+
 			try
 			{
 				string[] delFiles = Directory.GetFiles(this.sourceDir, "*.d");
@@ -326,23 +372,21 @@ namespace Scale_v3
 				startInfo.UseShellExecute = false;
 				startInfo.FileName = this.aclasApp;
 				startInfo.WindowStyle = ProcessWindowStyle.Hidden;
-				if (action == "Upload")
-				{
-					startInfo.Arguments = @"-h " + ip + @":5002 -t DOWN -b PLU -n " + this.sourceDir + filename + " -f Ascii";
 
-				}
-				else if (action == "Download")
+				switch (action)
 				{
-					startInfo.Arguments = @"-h " + ip + @":5002 -t UP -b PLU -n " + this.inDir + filename + " -f Ascii";
-
-				}
-				else if (action == "Delete")
-				{
-					startInfo.Arguments = @"-h " + ip + @":5002 -t DEL -b PLU -n " + this.sourceDir + filename + " -f Ascii";
-				}
-				else
-				{
-					logs("Action is not valid!");
+					case "Upload":
+						startInfo.Arguments = @"-h " + ip + @":5002 -t DOWN -b PLU -n " + this.sourceDir + filename + " -f Ascii";
+						break;
+					case "Download":
+						startInfo.Arguments = @"-h " + ip + @":5002 -t UP -b PLU -n " + this.inDir + filename + " -f Ascii";
+						break;
+					case "Delete":
+						startInfo.Arguments = @"-h " + ip + @":5002 -t DEL -b PLU -n " + this.sourceDir + filename + " -f Ascii";
+						break;
+					default:
+						logs($"{action} is not valid!");
+						return;
 				}
 
 				using (Process process = Process.Start(startInfo))
@@ -429,26 +473,6 @@ namespace Scale_v3
 			}
 		}
 
-		//private void processLogs(string message)
-		//{
-		//	DateTime now = DateTime.Now;
-		//	DateTime date = DateTime.Today;
-		//	string current = String.Format("{0:yyyyMMdd", date);
-		//	string logPath = this.iniFile.GetSetting("Target", "StatusPath");
-		//	string dat = this.iniFile.GetSetting("Settings", "Branch") + "." + current + ".SCALE.LOGS.dat";
-		//	string file = Path.Combine(logPath, dat);
-
-		//	if (!Directory.Exists(logPath))
-		//	{
-		//		Directory.CreateDirectory(logPath);
-		//	}
-
-		//	using (StreamWriter writer = new StreamWriter(file, true))
-		//	{
-		//		writer.WriteLine($"{now:yyyy-MM-dd HH:mm:ss}" + "             " + message);
-		//	}
-		//}
-
 		private void Form1_Resize(object sender, EventArgs e)
 		{
 			if (FormWindowState.Minimized == this.WindowState)
@@ -478,19 +502,17 @@ namespace Scale_v3
 
 		private void backgroundWorker1_RunWorkerCompleted(object sender, System.ComponentModel.RunWorkerCompletedEventArgs e)
 		{
-			if (e.Cancelled == true)
-			{
+			if (e.Cancelled == true) 
 				logs("Cancelled!");
-			}
-			else if (e.Error != null)
-			{
+			else if (e.Error != null) 
 				logs($"Error: {e.Error.Message}");
-			}
-			else
-			{
-				backgroundWorker1.CancelAsync();
+			else 
 				logs("Weighing Scale Process Done!");
-			}
+
+
+			fileWatcher?.Dispose();
+			backgroundWorker1.CancelAsync();
+			InitializeWatcher();
 		}
 	}
 }

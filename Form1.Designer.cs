@@ -109,7 +109,7 @@
 		private PictureBox pictureBox1;
 		private Label label1;
 		private NotifyIcon notifyIcon1;
-		private TextBox logTextBox;
-		private System.ComponentModel.BackgroundWorker backgroundWorker1;
+		private static TextBox logTextBox;
+		private static System.ComponentModel.BackgroundWorker backgroundWorker1;
 	}
 }
