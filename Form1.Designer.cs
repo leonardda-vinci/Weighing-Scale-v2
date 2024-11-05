@@ -35,6 +35,8 @@
 			label1 = new Label();
 			backgroundWorker1 = new System.ComponentModel.BackgroundWorker();
 			notifyIcon1 = new NotifyIcon(components);
+			copyBtn = new Button();
+			clearBtn = new Button();
 			((System.ComponentModel.ISupportInitialize)pictureBox1).BeginInit();
 			SuspendLayout();
 			// 
@@ -47,7 +49,7 @@
 			logTextBox.Name = "logTextBox";
 			logTextBox.ReadOnly = true;
 			logTextBox.ScrollBars = ScrollBars.Vertical;
-			logTextBox.Size = new Size(524, 137);
+			logTextBox.Size = new Size(524, 170);
 			logTextBox.TabIndex = 0;
 			// 
 			// pictureBox1
@@ -55,9 +57,9 @@
 			pictureBox1.ErrorImage = Properties.Resources.scale_icon;
 			pictureBox1.Image = Properties.Resources.scale_icon;
 			pictureBox1.InitialImage = Properties.Resources.scale_icon;
-			pictureBox1.Location = new Point(551, 12);
+			pictureBox1.Location = new Point(544, 12);
 			pictureBox1.Name = "pictureBox1";
-			pictureBox1.Size = new Size(121, 119);
+			pictureBox1.Size = new Size(128, 119);
 			pictureBox1.SizeMode = PictureBoxSizeMode.StretchImage;
 			pictureBox1.TabIndex = 1;
 			pictureBox1.TabStop = false;
@@ -65,7 +67,7 @@
 			// label1
 			// 
 			label1.AutoSize = true;
-			label1.Location = new Point(583, 134);
+			label1.Location = new Point(577, 134);
 			label1.Name = "label1";
 			label1.Size = new Size(63, 15);
 			label1.TabIndex = 2;
@@ -84,10 +86,34 @@
 			notifyIcon1.Visible = true;
 			notifyIcon1.MouseDoubleClick += notifyIcon1_MouseDoubleClick;
 			// 
+			// copyBtn
+			// 
+			copyBtn.ForeColor = Color.LimeGreen;
+			copyBtn.Location = new Point(544, 152);
+			copyBtn.Name = "copyBtn";
+			copyBtn.Size = new Size(61, 29);
+			copyBtn.TabIndex = 3;
+			copyBtn.Text = "Copy";
+			copyBtn.UseVisualStyleBackColor = true;
+			copyBtn.Click += copyBtn_Click;
+			// 
+			// clearBtn
+			// 
+			clearBtn.ForeColor = Color.OrangeRed;
+			clearBtn.Location = new Point(611, 153);
+			clearBtn.Name = "clearBtn";
+			clearBtn.Size = new Size(61, 29);
+			clearBtn.TabIndex = 4;
+			clearBtn.Text = "Clear";
+			clearBtn.UseVisualStyleBackColor = true;
+			clearBtn.Click += clearBtn_Click;
+			// 
 			// Form1
 			// 
 			AutoScaleMode = AutoScaleMode.Inherit;
-			ClientSize = new Size(684, 161);
+			ClientSize = new Size(684, 194);
+			Controls.Add(clearBtn);
+			Controls.Add(copyBtn);
 			Controls.Add(label1);
 			Controls.Add(pictureBox1);
 			Controls.Add(logTextBox);
@@ -109,7 +135,9 @@
 		private PictureBox pictureBox1;
 		private Label label1;
 		private NotifyIcon notifyIcon1;
-		private static TextBox logTextBox;
-		private static System.ComponentModel.BackgroundWorker backgroundWorker1;
+		private Button copyBtn;
+		private Button clearBtn;
+		private TextBox logTextBox;
+		private System.ComponentModel.BackgroundWorker backgroundWorker1;
 	}
 }

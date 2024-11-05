@@ -20,6 +20,7 @@ namespace Scale_v3
 		string extractDir;
 		string aclasApp;
 		string inDir;
+		List<string> scale;
 
 		private FileSystemWatcher fileWatcher;
 		IniParser iniFile;
@@ -28,6 +29,7 @@ namespace Scale_v3
 		{
 			this.devices = new string[3];
 			this.deviceStatus = new string[3];
+			this.scale = new List<string>();
 
 			this.iniFile = new IniParser(@"C:\RCS\Scale\config.ini");
 			this.sourceDir = this.iniFile.GetSetting("Settings", "Source");
@@ -36,7 +38,7 @@ namespace Scale_v3
 			this.extractDir = this.iniFile.GetSetting("Target", "ExtractPath");
 			this.inDir = this.iniFile.GetSetting("Settings", "In");
 
-			Console.WriteLine($"Source = " + this.iniFile.GetSetting("Settings", "Source"));
+			Console.WriteLine("Source = " + this.iniFile.GetSetting("Settings", "Source"));
 
 			InitializeComponent();
 
@@ -52,10 +54,6 @@ namespace Scale_v3
 				Application.Exit();
 			}
 
-			//for (int i = 1; i <= 3; i++)
-			//{
-			//	this.devices[i - 1] = this.iniFile.GetSetting("Address", "SD" + i.ToString());
-			//}
 			logTextBox.AppendText($"Weighing Scale is running...\r\n");
 			InitializeWatcher();
 			bingoFound();
@@ -66,46 +64,38 @@ namespace Scale_v3
 			try
 			{
 				fileWatcher = new FileSystemWatcher(this.sourceDir, "*bingo");
-				fileWatcher.NotifyFilter = NotifyFilters.LastWrite | NotifyFilters.FileName;
+				fileWatcher.NotifyFilter = NotifyFilters.LastWrite | NotifyFilters.Size;
 				fileWatcher.Changed += OnChanged;
 				fileWatcher.Error += OnError;
 				fileWatcher.EnableRaisingEvents = true;
 				fileWatcher.InternalBufferSize = 64 * 1024;
-				fileWatcher.IncludeSubdirectories = false;
 			}
 			catch (Exception err)
 			{
-				MessageBox.Show(err.Message);
+				logTextBox.AppendText(err.Message);
 			}
 		}
 
 		private void OnError(object sender, ErrorEventArgs e)
 		{
 			PrintException(e.GetException());
-			logs($"Exception: {e.GetException().Message}");
-
-			if (e.GetException() is InternalBufferOverflowException)
-			{
-				logs($"InteralBufferExceptionException: {e.GetException().Message}");
-				InitializeWatcher();
-				return;
-			}
+			if (e.GetException() is InternalBufferOverflowException) logs($"{e.GetException().Message}");
+			InitializeWatcher();
+			logs($"File System Watcher has been re-initialized successfully!");
 
 			while (true)
 			{
 				if (Directory.Exists(this.sourceDir))
 				{
-					logs($"The File Watcher has been restored and keeping an eye on your files in {this.sourceDir}!");
-					if (File.Exists("bingo"))
-						bingoFound();
-					else
-						InitializeWatcher();
+					if (File.Exists("bingo")) bingoFound();
+					InitializeWatcher();
+					logs($"Successfully connected to {this.sourceDir}.");
 					break;
 				}
-				else 
+				else
 				{
-					logs($"{this.sourceDir} is not accessible right now. Retrying in 5 seconds...");
-					Thread.Sleep(5000);
+					logs($"Unable to access {this.sourceDir}. Retrying in 5 minutes...");
+					Thread.Sleep(300000);
 				}
 			}
 		}
@@ -114,27 +104,17 @@ namespace Scale_v3
 		{
 			if (err == null) return;
 			string timestamp = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
-			string message = $"[{timestamp}] Message: {err.Message}";
 
-			if (err.InnerException != null)
-			{
-				message += $"\r\n[{timestamp}] InnerException: {err.InnerException}";
-			}
+			if (err.Message != null) logs($"[{timestamp}] Message: {err.Message}");
 
-			if (err.StackTrace != null)
-			{
-				message += $"\r\n[{timestamp}] StackTrace: {err.StackTrace}";
-			}
+			if (err.InnerException != null) logs($"[{timestamp}] InnerException: {err.InnerException}");
 
-			logs(message);
+			if (err.StackTrace != null) logs($"[{timestamp}] StackTrace: {err.StackTrace}");
 
-			//logTextBox.Invoke((Action)(() =>
-			//{
-			//	logTextBox.AppendText($"{message}\r\n");
-			//}));
+			
 
-			//MessageBox.Show(message, "Print Exception Error", MessageBoxButtons.OK);
 			PrintException(err.InnerException);
+			
 		}
 
 		private void OnChanged(object sender, FileSystemEventArgs e)
@@ -151,10 +131,8 @@ namespace Scale_v3
 						logTextBox.Text = "bingo file found!" + "\r\n" + logTextBox.Text;
 					});
 
-					if (!backgroundWorker1.IsBusy)
-					{
+					if (!backgroundWorker1.IsBusy) 
 						backgroundWorker1.RunWorkerAsync();
-					}
 				}
 			}
 		}
@@ -163,7 +141,7 @@ namespace Scale_v3
 		{
 			string timestamp = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
 
-			for (int i = 1; i <= 3; i++)
+			for (int i = 1; i <= this.devices.Length; i++)
 			{
 				string ip = this.iniFile.GetSetting("Address", "SD" + i.ToString());
 				this.deviceStatus[i - 1] = timestamp + "|" + ip;
@@ -190,7 +168,14 @@ namespace Scale_v3
 
 			for (int i = 0; i < this.devices.Length; i++)
 			{
-				Download(this.devices[i]);
+				if (this.devices[i] != null)
+				{
+					Download(this.devices[i]);
+				}
+				else
+				{
+					this.deviceStatus[i] += "|NOK";
+				}
 			}
 
 			StatusLogs();
@@ -204,7 +189,14 @@ namespace Scale_v3
 
 			for (int i = 0; i < this.devices.Length; i++)
 			{
-				Delete(this.devices[i]);
+				if (this.devices[i] != null)
+				{
+					Delete(this.devices[i]);
+				}
+				else
+				{
+					this.deviceStatus[i] += "|NOK";
+				}
 			}
 		}
 
@@ -229,7 +221,7 @@ namespace Scale_v3
 		private void Upload(string[] ip)
 		{
 			string[] files = Directory.GetFiles(this.sourceDir, "*.iu");
-			
+
 			if (files.Length > 0)
 			{
 				foreach (string file in files)
@@ -244,7 +236,7 @@ namespace Scale_v3
 						}
 
 						logs($"Uploading {name} to {ip[i]}...");
-						aclasCmd("Upload", name, ip[i]);
+						aclasCmd("Upload", name, ip[i], this.sourceDir);
 						logs($"{name} was successfully uploaded to {ip[i]}...");
 					}
 
@@ -273,25 +265,13 @@ namespace Scale_v3
 
 		private void Download(string ip)
 		{
-			if (ip == null)
-			{
-				for (int i = 0; i < this.devices.Length; i++)
-				{
-					if (this.devices[i] == null)
-					{
-						this.deviceStatus[i] += "|NOK";
-					}
-				}
-				return;
-			}
-
 			DateTime date = DateTime.Today;
 			string current = String.Format("{0:yyyyMMdd}", date);
 			string filename = ip + "_PLU-UP_" + current + ".txt";
 			string from = Path.Combine(this.inDir, filename);
 			string to = Path.Combine(this.extractDir, filename);
 			logs($"Downloading {ip} data...");
-			aclasCmd("Download", filename, ip);
+			aclasCmd("Download", filename, ip, this.inDir);
 			try
 			{
 				logs($"{filename} was sucessfully created!");
@@ -309,25 +289,13 @@ namespace Scale_v3
 
 		private void Delete(string ip)
 		{
-			if (ip == null)
-			{
-				for (int i = 0; i < this.devices.Length; i++)
-				{
-					if (this.devices[i] == null)
-					{
-						this.deviceStatus[i] += "|NOK";
-					}
-				}
-				return;
-			}
-
 			try
 			{
 				string[] delFiles = Directory.GetFiles(this.sourceDir, "*.d");
 
 				foreach (string del in delFiles)
 				{
-					aclasCmd("Delete", del, ip);
+					aclasCmd("Delete", del, ip, this.sourceDir);
 					string destination = Path.Combine(this.downloadDir, del);
 					if (File.Exists(destination))
 					{
@@ -363,7 +331,7 @@ namespace Scale_v3
 			}
 		}
 
-		private void aclasCmd(string action, string filename, string ip)
+		private void aclasCmd(string action, string filename, string ip, string target)
 		{
 			try
 			{
@@ -376,13 +344,13 @@ namespace Scale_v3
 				switch (action)
 				{
 					case "Upload":
-						startInfo.Arguments = @"-h " + ip + @":5002 -t DOWN -b PLU -n " + this.sourceDir + filename + " -f Ascii";
+						startInfo.Arguments = @"-h " + ip + @":5002 -t DOWN -b PLU -n " + target + filename + " -f Ascii";
 						break;
 					case "Download":
-						startInfo.Arguments = @"-h " + ip + @":5002 -t UP -b PLU -n " + this.inDir + filename + " -f Ascii";
+						startInfo.Arguments = @"-h " + ip + @":5002 -t UP -b PLU -n " + target + filename + " -f Ascii";
 						break;
 					case "Delete":
-						startInfo.Arguments = @"-h " + ip + @":5002 -t DEL -b PLU -n " + this.sourceDir + filename + " -f Ascii";
+						startInfo.Arguments = @"-h " + ip + @":5002 -t DEL -b PLU -n " + target + filename + " -f Ascii";
 						break;
 					default:
 						logs($"{action} is not valid!");
@@ -396,7 +364,7 @@ namespace Scale_v3
 						process.WaitForExit();
 						for (int i = 0; i < this.deviceStatus.Length; i++)
 						{
-							if (this.deviceStatus[i].Contains(ip))
+							if (this.deviceStatus[i]?.Contains(ip) == true)
 							{
 								string statusMessage = process.ExitCode == 0 ? "|OK" : "|NOD";
 								this.deviceStatus[i] += statusMessage;
@@ -438,9 +406,7 @@ namespace Scale_v3
 		{
 			string[] bingoFiles = Directory.GetFiles(this.sourceDir, "*bingo");
 			if (bingoFiles.Length > 0)
-			{
 				backgroundWorker1.RunWorkerAsync();
-			}
 		}
 
 		private void logs(string message)
@@ -463,9 +429,7 @@ namespace Scale_v3
 			string file = Path.Combine(logPath, dat);
 
 			if (!Directory.Exists(logPath))
-			{
 				Directory.CreateDirectory(logPath);
-			}
 
 			using (StreamWriter sw = new StreamWriter(file, true))
 			{
@@ -502,17 +466,115 @@ namespace Scale_v3
 
 		private void backgroundWorker1_RunWorkerCompleted(object sender, System.ComponentModel.RunWorkerCompletedEventArgs e)
 		{
-			if (e.Cancelled == true) 
+			if (e.Cancelled == true)
 				logs("Cancelled!");
-			else if (e.Error != null) 
+			else if (e.Error != null)
 				logs($"Error: {e.Error.Message}");
-			else 
+			else
 				logs("Weighing Scale Process Done!");
 
 
 			fileWatcher?.Dispose();
 			backgroundWorker1.CancelAsync();
 			InitializeWatcher();
+		}
+		
+		private async void copyBtn_Click(object sender, EventArgs e)
+		{
+			DateTime date = DateTime.Today;
+			string current = String.Format("{0:yyyyMMdd}", date);
+			string timestamp = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
+			string filename = "PLU." + current + ".iu";
+			string file = Path.Combine(this.sourceDir, filename);
+			Copy copy = new Copy();
+			copy.ShowDialog();
+
+			if (!string.IsNullOrEmpty(copy.CB1)) this.scale.Add(copy.CB1);
+			if (!string.IsNullOrEmpty(copy.CB2)) this.scale.Add(copy.CB2);
+			if (!string.IsNullOrEmpty(copy.CB3)) this.scale.Add(copy.CB3);
+
+			string radioBtn = copy.RadioBtn;
+
+			if (radioBtn != "")
+			{
+				for (int i = 1; i <= 3; i++)
+				{
+					if (radioBtn == this.iniFile.GetSetting("Address", "SD" + i.ToString()))
+					{
+						logs($"Copying data of {radioBtn}, please wait...");
+						aclasCmd("Download", filename, radioBtn, this.sourceDir);
+						if (File.Exists(this.sourceDir + filename)) logs($"{filename} has been successfully created!");
+						break;
+					}
+				}
+
+				if (file.Length > 0)
+				{
+					foreach (string sd in this.scale)
+					{
+						aclasCmd("Upload", filename, sd, this.sourceDir);
+						aclasCmd("Download", (sd + "_PLU-UP_" + current + ".txt"), sd, this.inDir);
+						logs($"{radioBtn} data has been successfully transfered to {sd}.");
+					}
+
+					if (File.Exists(this.downloadDir + filename)) 
+						File.Delete(this.downloadDir + filename);
+					File.Move(file, this.downloadDir + filename);
+
+					using (StreamWriter writer = new StreamWriter(this.inDir + "bingo"))
+					{
+						writer.WriteLine();
+					}
+
+					await this.HTTP(this.iniFile.GetSetting("Address", "Get"));
+					InitializeWatcher();
+				}
+			}
+		}
+
+		private async void clearBtn_Click(object sender, EventArgs e)
+		{
+			DateTime date = DateTime.Today;
+			string current = String.Format("{0:yyyyMMdd}", date);
+			string filename = "PLU." + current + ".d";
+			string file = Path.Combine(this.sourceDir, filename);
+			Clear clear = new Clear();
+			clear.ShowDialog();
+
+			if (!string.IsNullOrEmpty(clear.CB1)) this.scale.Add(clear.CB1);
+			if (!string.IsNullOrEmpty(clear.CB2)) this.scale.Add(clear.CB2);
+			if (!string.IsNullOrEmpty(clear.CB3)) this.scale.Add(clear.CB3);
+
+			foreach (string sd in scale)
+			{
+				for (int i = 1; i <= 3; i++)
+				{
+					if (sd == this.iniFile.GetSetting("Address", "SD" + i.ToString()))
+					{
+						aclasCmd("Download", filename, sd, this.sourceDir);
+						if (File.Exists(this.sourceDir + filename))
+							logs($"{filename} has been successfully created");
+					}
+				}
+
+				if (file.Length > 0)
+				{
+					aclasCmd("Delete", file, sd, this.sourceDir);
+					aclasCmd("Download", (sd + "_PLU-UP_" + current + ".txt"), sd, this.inDir);
+					logs($"{sd} data has been cleared successfully.");
+				}
+
+				if (File.Exists(this.downloadDir + filename)) File.Delete(this.downloadDir + filename);
+				File.Move(this.sourceDir + filename, this.downloadDir + filename);
+
+				using (StreamWriter writer = new StreamWriter(this.inDir + "bingo"))
+				{
+					writer.WriteLine();
+				}
+
+				await this.HTTP(this.iniFile.GetSetting("Address", "Get"));
+				InitializeWatcher();
+			}
 		}
 	}
 }
