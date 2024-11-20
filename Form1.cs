@@ -6,6 +6,7 @@ using System.Drawing.Printing;
 using System.IO;
 using System.Net.NetworkInformation;
 using System.Runtime.CompilerServices;
+using System.Security.Policy;
 using System.Windows.Forms;
 using System.Xml.Linq;
 
@@ -15,12 +16,15 @@ namespace Scale_v3
 	{
 		string[] devices;
 		string[] deviceStatus;
+		string[] status;
 		string sourceDir;
 		string downloadDir;
 		string extractDir;
 		string aclasApp;
 		string inDir;
+		string query;
 		List<string> scale;
+		HttpClient qParams;
 
 		private FileSystemWatcher fileWatcher;
 		IniParser iniFile;
@@ -29,7 +33,10 @@ namespace Scale_v3
 		{
 			this.devices = new string[3];
 			this.deviceStatus = new string[3];
+			this.status = new string[3];
+
 			this.scale = new List<string>();
+			this.qParams = new HttpClient();
 
 			this.iniFile = new IniParser(@"C:\RCS\Scale\config.ini");
 			this.sourceDir = this.iniFile.GetSetting("Settings", "Source");
@@ -37,15 +44,18 @@ namespace Scale_v3
 			this.aclasApp = this.iniFile.GetSetting("APP", "EXE");
 			this.extractDir = this.iniFile.GetSetting("Target", "ExtractPath");
 			this.inDir = this.iniFile.GetSetting("Settings", "In");
+			this.query = this.iniFile.GetSetting("Address", "Query");
 
 			Console.WriteLine("Source = " + this.iniFile.GetSetting("Settings", "Source"));
 
 			InitializeComponent();
 
 
-			if (!Directory.Exists(this.downloadDir)) Directory.CreateDirectory(this.downloadDir);
+			if (!Directory.Exists(this.downloadDir)) 
+				Directory.CreateDirectory(this.downloadDir);
 
-			if (!Directory.Exists(this.extractDir)) Directory.CreateDirectory(this.extractDir);
+			if (!Directory.Exists(this.extractDir)) 
+				Directory.CreateDirectory(this.extractDir);
 
 			if (InitClass.CheckApp() == true)
 			{
@@ -54,6 +64,7 @@ namespace Scale_v3
 				Application.Exit();
 			}
 
+			statusBgWorker.RunWorkerAsync();
 			logTextBox.AppendText($"Weighing Scale is running...\r\n");
 			InitializeWatcher();
 			bingoFound();
@@ -69,10 +80,11 @@ namespace Scale_v3
 				fileWatcher.Error += OnError;
 				fileWatcher.EnableRaisingEvents = true;
 				fileWatcher.InternalBufferSize = 64 * 1024;
+				fileWatcher.IncludeSubdirectories = false;
 			}
 			catch (Exception err)
 			{
-				logTextBox.AppendText(err.Message);
+				logs(err.Message);
 			}
 		}
 
@@ -103,18 +115,13 @@ namespace Scale_v3
 		private void PrintException(Exception? err)
 		{
 			if (err == null) return;
-			string timestamp = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
-
-			if (err.Message != null) logs($"[{timestamp}] Message: {err.Message}");
-
-			if (err.InnerException != null) logs($"[{timestamp}] InnerException: {err.InnerException}");
-
-			if (err.StackTrace != null) logs($"[{timestamp}] StackTrace: {err.StackTrace}");
-
+			string timestamp = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss tt");
 			
-
+			if (err.Message != null) logs($"Message: {err.Message}");
+			if (err.InnerException != null) logs($"InnerException: {err.InnerException}");
+			if (err.StackTrace != null) logs($"StackTrace: {err.StackTrace}");
 			PrintException(err.InnerException);
-			
+
 		}
 
 		private void OnChanged(object sender, FileSystemEventArgs e)
@@ -131,15 +138,20 @@ namespace Scale_v3
 						logTextBox.Text = "bingo file found!" + "\r\n" + logTextBox.Text;
 					});
 
-					if (!backgroundWorker1.IsBusy) 
+					//Thread.Sleep(2000);
+
+					if (!backgroundWorker1.IsBusy)
+					{
+						fileWatcher?.Dispose();
 						backgroundWorker1.RunWorkerAsync();
+					}
 				}
 			}
 		}
 
 		private void backgroundWorker1_DoWork(object sender, System.ComponentModel.DoWorkEventArgs e)
 		{
-			string timestamp = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
+			string timestamp = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss tt");
 
 			for (int i = 1; i <= this.devices.Length; i++)
 			{
@@ -178,14 +190,13 @@ namespace Scale_v3
 				}
 			}
 
-			StatusLogs();
-
 			using (StreamWriter writer = new StreamWriter(this.inDir + "bingo"))
 			{
 				writer.WriteLine();
 			}
 
 			await this.HTTP(this.iniFile.GetSetting("Address", "Get"));
+			StatusLogs();
 
 			for (int i = 0; i < this.devices.Length; i++)
 			{
@@ -205,15 +216,12 @@ namespace Scale_v3
 			Ping sender = new Ping();
 			PingOptions options = new PingOptions();
 			PingReply reply = sender.Send(ip);
-			logs($"Pinging " + ip);
 			if (reply.Status == IPStatus.Success)
 			{
-				logs($"The {ip} IP address is available.");
 				return true;
 			}
 			else
 			{
-				logs($"The {ip} IP address is not available");
 				return false;
 			}
 		}
@@ -226,22 +234,21 @@ namespace Scale_v3
 			{
 				foreach (string file in files)
 				{
-					string name = Path.GetFileName(file);
-					for (int i = 0; i < this.devices.Length; i++)
-					{
-						if (this.devices[i] == null)
-						{
-							this.deviceStatus[i] += "|NOK";
-							continue; // Skip to the next iteration
-						}
-
-						logs($"Uploading {name} to {ip[i]}...");
-						aclasCmd("Upload", name, ip[i], this.sourceDir);
-						logs($"{name} was successfully uploaded to {ip[i]}...");
-					}
-
 					try
 					{
+						string name = Path.GetFileName(file);
+						for (int i = 0; i < this.devices.Length; i++)
+						{
+							if (this.devices[i] == null)
+							{
+								this.deviceStatus[i] += "|NOK";
+								continue;
+							}
+
+							logs($"Uploading {name} to {ip[i]}...");
+							aclasCmd("Upload", name, ip[i], this.sourceDir);
+							logs($"{name} was successfully uploaded to {ip[i]}...");
+						}
 						string destination = Path.Combine(this.downloadDir, name);
 						if (File.Exists(destination))
 						{
@@ -257,7 +264,7 @@ namespace Scale_v3
 					}
 					catch (Exception ex)
 					{
-						logs($"Error moving file: {ex.Message}");
+						logs($"An error occured due to: {ex.Message}");
 					}
 				}
 			}
@@ -270,10 +277,10 @@ namespace Scale_v3
 			string filename = ip + "_PLU-UP_" + current + ".txt";
 			string from = Path.Combine(this.inDir, filename);
 			string to = Path.Combine(this.extractDir, filename);
-			logs($"Downloading {ip} data...");
-			aclasCmd("Download", filename, ip, this.inDir);
 			try
 			{
+				logs($"Downloading {ip} data...");
+				aclasCmd("Download", filename, ip, this.inDir);
 				logs($"{filename} was sucessfully created!");
 				if (File.Exists(to))
 				{
@@ -312,6 +319,9 @@ namespace Scale_v3
 
 		private async Task HTTP(string url)
 		{
+			DateTime now = DateTime.Now;
+			logs("Requesting HTTP GET...");
+			ProcessLogs(url);
 			try
 			{
 				using (HttpClient client = new HttpClient())
@@ -319,11 +329,16 @@ namespace Scale_v3
 					var response = await client.GetAsync(url);
 					if (response.IsSuccessStatusCode)
 					{
+						logs($"Status Code: {response.StatusCode}");
+						logs($"Response Body: {await response.Content.ReadAsStringAsync()}");
 					}
 					else
 					{
+						logs($"Status Code: {response.StatusCode}");
+						logs($"Response Body: {await response.Content.ReadAsStringAsync()}");
 					}
 				}
+				logs("HTTP GET Request done!");
 			}
 			catch (Exception err)
 			{
@@ -433,7 +448,7 @@ namespace Scale_v3
 
 			using (StreamWriter sw = new StreamWriter(file, true))
 			{
-				sw.WriteLine($"{now:yyyy-MM-dd HH:mm:ss}" + "             " + message + "\r\n");
+				sw.WriteLine($"{now:yyyy-MM-dd HH:mm:ss}" + "      " + message);
 			}
 		}
 
@@ -474,20 +489,23 @@ namespace Scale_v3
 				logs("Weighing Scale Process Done!");
 
 
-			fileWatcher?.Dispose();
-			backgroundWorker1.CancelAsync();
+			//fileWatcher?.Dispose();
+			if (backgroundWorker1.IsBusy)
+				backgroundWorker1.CancelAsync();
 			InitializeWatcher();
 		}
-		
+
 		private async void copyBtn_Click(object sender, EventArgs e)
 		{
 			DateTime date = DateTime.Today;
 			string current = String.Format("{0:yyyyMMdd}", date);
-			string timestamp = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
+			string timestamp = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss tt");
 			string filename = "PLU." + current + ".iu";
 			string file = Path.Combine(this.sourceDir, filename);
 			Copy copy = new Copy();
 			copy.ShowDialog();
+
+			scale.Clear();
 
 			if (!string.IsNullOrEmpty(copy.CB1)) this.scale.Add(copy.CB1);
 			if (!string.IsNullOrEmpty(copy.CB2)) this.scale.Add(copy.CB2);
@@ -517,7 +535,7 @@ namespace Scale_v3
 						logs($"{radioBtn} data has been successfully transfered to {sd}.");
 					}
 
-					if (File.Exists(this.downloadDir + filename)) 
+					if (File.Exists(this.downloadDir + filename))
 						File.Delete(this.downloadDir + filename);
 					File.Move(file, this.downloadDir + filename);
 
@@ -527,7 +545,6 @@ namespace Scale_v3
 					}
 
 					await this.HTTP(this.iniFile.GetSetting("Address", "Get"));
-					InitializeWatcher();
 				}
 			}
 		}
@@ -540,6 +557,8 @@ namespace Scale_v3
 			string file = Path.Combine(this.sourceDir, filename);
 			Clear clear = new Clear();
 			clear.ShowDialog();
+
+			scale.Clear();
 
 			if (!string.IsNullOrEmpty(clear.CB1)) this.scale.Add(clear.CB1);
 			if (!string.IsNullOrEmpty(clear.CB2)) this.scale.Add(clear.CB2);
@@ -573,8 +592,38 @@ namespace Scale_v3
 				}
 
 				await this.HTTP(this.iniFile.GetSetting("Address", "Get"));
-				InitializeWatcher();
 			}
 		}
+
+		private async void statusBgWorker_DoWork(object sender, System.ComponentModel.DoWorkEventArgs e)
+		{
+			//while (true)
+			//{
+			//	string queParams = $"{this.query}";
+			//	string status = "&device=";
+			//	if (InitClass.Active() == true)
+			//		queParams += $"status={DateTimeOffset.UtcNow.ToUnixTimeSeconds()}";
+
+			//	for (int i = 1; i <= 3; i++)
+			//	{
+			//		string ip = this.iniFile.GetSetting("Address", "SD" + i.ToString());
+			//		if (CheckPing(ip))
+			//			status += "1";
+			//		else
+			//			status += "0";
+			//	}
+			//	queParams += status;
+			//	logs(queParams);
+			//	//await this.qParams.GetAsync(queParams);  
+			//	Thread.Sleep(300000);
+			//	//logs("after 5 minutes...");
+			//}
+		}
+
+		private async void Form1_FormClosed(object sender, FormClosedEventArgs e)
+		{
+			//await this.qParams.GetAsync($"{this.query}status={DateTimeOffset.UtcNow.ToUnixTimeSeconds()}");
+			//MessageBox.Show($"{this.query}status=closed&timestamp={DateTimeOffset.UtcNow.ToUnixTimeSeconds()}");
+		}
 	}
-}
+}	

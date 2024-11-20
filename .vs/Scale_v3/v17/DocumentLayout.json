@@ -7,8 +7,8 @@
       "RelativeMoniker": "D:0:0:{B14E27B9-E729-4F22-9BFE-E9E7C21A9E6D}|Scale_v3.csproj|solutionrelative:form1.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{B14E27B9-E729-4F22-9BFE-E9E7C21A9E6D}|Scale_v3.csproj|c:\\users\\rcs\\source\\repos\\scale_v3\\clear.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{B14E27B9-E729-4F22-9BFE-E9E7C21A9E6D}|Scale_v3.csproj|solutionrelative:clear.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{B14E27B9-E729-4F22-9BFE-E9E7C21A9E6D}|Scale_v3.csproj|c:\\users\\rcs\\source\\repos\\scale_v3\\iniparser.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{B14E27B9-E729-4F22-9BFE-E9E7C21A9E6D}|Scale_v3.csproj|solutionrelative:iniparser.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{B14E27B9-E729-4F22-9BFE-E9E7C21A9E6D}|Scale_v3.csproj|C:\\Users\\RCS\\source\\repos\\Scale_v3\\form1.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form",
@@ -32,22 +32,23 @@
               "RelativeDocumentMoniker": "Form1.cs",
               "ToolTip": "C:\\Users\\RCS\\source\\repos\\Scale_v3\\Form1.cs",
               "RelativeToolTip": "Form1.cs",
-              "ViewState": "AgIAALEBAAAAAAAAAAAvwMIBAABMAAAAAAAAAA==",
+              "ViewState": "AgIAAKcBAAAAAAAAAAAowLMBAAAqAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2024-10-28T00:41:45.104Z",
+              "IsPinned": true,
               "EditorCaption": ""
             },
             {
               "$type": "Document",
               "DocumentIndex": 1,
-              "Title": "Clear.cs",
-              "DocumentMoniker": "C:\\Users\\RCS\\source\\repos\\Scale_v3\\Clear.cs",
-              "RelativeDocumentMoniker": "Clear.cs",
-              "ToolTip": "C:\\Users\\RCS\\source\\repos\\Scale_v3\\Clear.cs",
-              "RelativeToolTip": "Clear.cs",
-              "ViewState": "AgIAABcAAAAAAAAAAAAQwCAAAAAQAAAAAAAAAA==",
+              "Title": "IniParser.cs",
+              "DocumentMoniker": "C:\\Users\\RCS\\source\\repos\\Scale_v3\\IniParser.cs",
+              "RelativeDocumentMoniker": "IniParser.cs",
+              "ToolTip": "C:\\Users\\RCS\\source\\repos\\Scale_v3\\IniParser.cs",
+              "RelativeToolTip": "IniParser.cs",
+              "ViewState": "AgIAALkAAAAAAAAAAAAkwNsAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2024-11-04T04:06:34.604Z"
+              "WhenOpened": "2024-11-19T07:00:26.273Z"
             },
             {
               "$type": "Document",

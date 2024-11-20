@@ -37,6 +37,7 @@
 			notifyIcon1 = new NotifyIcon(components);
 			copyBtn = new Button();
 			clearBtn = new Button();
+			statusBgWorker = new System.ComponentModel.BackgroundWorker();
 			((System.ComponentModel.ISupportInitialize)pictureBox1).BeginInit();
 			SuspendLayout();
 			// 
@@ -108,6 +109,11 @@
 			clearBtn.UseVisualStyleBackColor = true;
 			clearBtn.Click += clearBtn_Click;
 			// 
+			// statusBgWorker
+			// 
+			statusBgWorker.WorkerSupportsCancellation = true;
+			statusBgWorker.DoWork += statusBgWorker_DoWork;
+			// 
 			// Form1
 			// 
 			AutoScaleMode = AutoScaleMode.Inherit;
@@ -124,6 +130,7 @@
 			StartPosition = FormStartPosition.CenterScreen;
 			Text = "Weighing Scale";
 			WindowState = FormWindowState.Minimized;
+			FormClosed += Form1_FormClosed;
 			Shown += Form1_Shown;
 			Resize += Form1_Resize;
 			((System.ComponentModel.ISupportInitialize)pictureBox1).EndInit();
@@ -139,5 +146,6 @@
 		private Button clearBtn;
 		private TextBox logTextBox;
 		private System.ComponentModel.BackgroundWorker backgroundWorker1;
+		private System.ComponentModel.BackgroundWorker statusBgWorker;
 	}
 }

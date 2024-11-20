@@ -39,13 +39,19 @@ namespace Scale_v3
 					RadioBtn = this.iniFile.GetSetting("Address", "SD3");
 
 				if (checkBox1.Checked)
+				{
 					CB1 = this.iniFile.GetSetting("Address", "SD1");
+				}
 
 				if (checkBox2.Checked)
+				{
 					CB2 = this.iniFile.GetSetting("Address", "SD2");
+				}
 
 				if (checkBox3.Checked)
+				{
 					CB3 = this.iniFile.GetSetting("Address", "SD3");
+				}
 
 				this.DialogResult = DialogResult.OK;
 			}
